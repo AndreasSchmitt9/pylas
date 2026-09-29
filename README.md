@@ -1,2 +1,2 @@
 # pylas
-Code to read and write Welas Single Particle via python.
+Code to read and write Welas Single Particle data with python.
