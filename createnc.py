@@ -45,7 +45,6 @@ class dataSaver:
     """
     def process_packet(self, raw_bytes):
         text = raw_bytes.decode(errors='replace').strip()
-        #print(f"Received data: {raw_bytes}") 
         #finds header
         if not text.startswith('#') or ':' not in text:
             return None
@@ -54,7 +53,8 @@ class dataSaver:
             counter = int(header.lstrip('#'))
         except ValueError:
             return None
-
+        
+        #Finds events
         events = []
         for chunk in body.rstrip(';').split(';'):
             chunk = chunk.strip()
@@ -67,21 +67,22 @@ class dataSaver:
                 events.append((int(parts[0]), float(parts[1]), float(parts[2]))) # allowed data format
             except ValueError:
                 continue
-            #write Data
-            for channel, size_um, passing_time in events:
-                i=self.nc_index
-                self.dataset.variables['timestamp'][i] = time.time() # now!
-                self.dataset.variables['channel'][i] = channel
-                self.dataset.variables['size_um'][i] = size_um
-                self.dataset.variables['passing_time'][i] = passing_time
-                self.nc_index += 1
-                #update dataset on disk
-                if self.nc_index == 100: # saves every 1000 events 
-                    print(f"Logging successfull")
-                #print(self.nc_index)
+
+        #write Data
+        for channel, size_um, passing_time in events:
+            i=self.nc_index
+            self.dataset.variables['timestamp'][i] = time.time() # now!
+            self.dataset.variables['channel'][i] = channel
+            self.dataset.variables['size_um'][i] = size_um
+            self.dataset.variables['passing_time'][i] = passing_time
+            self.nc_index += 1 #update dataset on disk
+               
+
+            if self.nc_index == 100: 
+                print(f"Logging successfull")
+               
             self.dataset.sync()
-            #if self.nc_index == 100: # saves every 1000 events 
-            #    print(f"Logging successfull")
+
         return events
 
 
