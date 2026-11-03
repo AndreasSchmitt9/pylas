@@ -1,0 +1,28 @@
+[pid]
+KP = 1.0
+KI = 0.1
+KD = 0.0
+LWC_TARGET = 0.000005          # desired LWC in g/m^3 
+GAIN = 5000                  # gain for feedforward control
+DT_S = 2                # control period in seconds (10 Hz)
+MIN_CONCENTRATION = 0.0     # Minimum concentration limit
+MAX_CONCENTRATION = 1.0e8   # Maximum concentration limit
+OMEGA = 0.1
+LWC_0=0.5
+AMPLITUDE = 0.0
+
+[pre]
+#In promo under sensor: particle velocity = 12,66 m/s, WDH=495,495,309 Welas 2500
+WIDTH=493 #um
+DEPTH=493 #um
+HEIGHT=313 #um
+WINDOW_S=10 # Integration Window for lwc
+VELOCITY = 12.66 #m/s
+RHO_WATER_G_M3 = 1.0e6 # Density of water
+
+
+[ReadWrite]
+WELAS_LISTEN_IP = '0.0.0.0'
+WELAS_LISTEN_PORT = 56790
+dataset = "data/lwc_control/initial_setup.nc"
+

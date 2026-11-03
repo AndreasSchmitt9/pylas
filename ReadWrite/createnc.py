@@ -1,3 +1,5 @@
+import queue
+
 import netCDF4 as nc
 import time
 import os
@@ -11,7 +13,7 @@ class dataSaver:
 
 
 
-    def __init__(self, filename):
+    def __init__(self, filename, control_list=None):
 
         base, ext = os.path.splitext(filename)
         self.filename=f"{base}_{datetime.now():%Y%m%d_%H%M%S}{ext}"
@@ -33,6 +35,8 @@ class dataSaver:
         self.dataset.variables['size_um'].units = 'micrometers'
         self.dataset.variables['passing_time'].units = 'microseconds'
 
+        self.control_list = control_list  
+        
         print("Created dataset:", filename)
     """
     Processes raw data and writes them to .nc file. 
@@ -69,9 +73,10 @@ class dataSaver:
                 continue
 
         #write Data
+        now= time.time() # Only One timestamp per packet
         for channel, size_um, passing_time in events:
             i=self.nc_index
-            self.dataset.variables['timestamp'][i] = time.time() # now!
+            self.dataset.variables['timestamp'][i] = now # now!
             self.dataset.variables['channel'][i] = channel
             self.dataset.variables['size_um'][i] = size_um
             self.dataset.variables['passing_time'][i] = passing_time
@@ -81,9 +86,28 @@ class dataSaver:
             if self.nc_index == 100: 
                 print(f"Logging successfull")
                
-            self.dataset.sync()
-
+            
+        self.dataset.sync()
+        if events and self.control_list is not None:
+            self.control_list.extend([(now, ch, s, p) for ch, s, p in events])
+        #if events and self.plotted_queue is not None:
+            #self.plotted_queue.put_latest([(now, ch, s, p) for ch, s, p in events])
         return events
+
+
+
+    def put_latest(q, item):
+        try:
+            q.put_nowait(item)
+        except queue.Full:
+            try:
+                q.get_nowait()      # drop the oldest
+            except queue.Empty:
+                pass
+            try:
+                q.put_nowait(item)
+            except queue.Full:
+                pass
 
 
     def stop(self):
