@@ -1,7 +1,8 @@
 # Data
 /data/
-
+/Control/logs/
 
 # Python cache
 __pycache__/
 *.py[cod]
+
